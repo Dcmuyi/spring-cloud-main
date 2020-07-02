@@ -1,0 +1,54 @@
+server:
+  port : 8083
+
+spring:
+  application:
+    name: eureka-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lowerCaseServiceId: false
+      default-filters:
+        - name: Hystrix
+          args:
+            name: fallbackCmd
+            fallbackUri: forward:/fallback
+      routes:
+        - id: service-hi
+          uri: lb://SERVICE-HI
+          predicates:
+            - Path=/hi/**
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 3000
+          semaphore:
+            #默认值10
+            maxConcurrentRequests: 1000
+      circuitBreaker:
+        sleepWindowInMilliseconds:  5000
+      fallback:
+        isolation:
+          semaphore:
+            #默认值10
+            maxConcurrentRequests: 1000
+
+
+# 服务注册配置
+# 使用IP注册
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: false
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+
