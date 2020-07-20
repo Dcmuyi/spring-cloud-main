@@ -17,41 +17,66 @@ import java.util.List;
 @Slf4j
 public class CodeGenerator {
     public static void main(String[] args) {
-        // 代码生成器
-        AutoGenerator mpg = new AutoGenerator();
-        //表明-,分割
-        String module = "dc";
-        String tableStr = "default";
+        //配置项
+        String dbUrl = "jdbc:mysql://127.0.0.1:3306/dc?useUnicode=true&useSSL=false&characterEncoding=utf8";
+        String userName = "root";
+        String password = "muyi123";
+        String parentPack = "com.muyi.servicestudy";        //包路径
+        String outPutDir = "/service-study/src/main/java";        //项目输出路径
+        String module = "muyi";        //模块名
+        String tableStr = "album";        //表名
 
         // 全局配置
         GlobalConfig gc = new GlobalConfig();
         String projectPath = System.getProperty("user.dir");
         log.info("project path:"+projectPath);
-        gc.setOutputDir(projectPath + "/service-study/src/main/java");
+        gc.setOutputDir(projectPath + outPutDir);
         gc.setAuthor("Muyi, dcmuyi@qq.com");
         gc.setOpen(false);
-        // gc.setSwagger2(true); 实体属性 Swagger2 注解
-        mpg.setGlobalConfig(gc);
+        gc.setFileOverride(true);    //是否覆盖原文件
 
         // 数据源配置
         DataSourceConfig dsc = new DataSourceConfig();
-        dsc.setUrl("jdbc:mysql://127.0.0.1:3306/dc?useUnicode=true&useSSL=false&characterEncoding=utf8");
+        dsc.setUrl(dbUrl);
         // dsc.setSchemaName("public");
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
-        dsc.setUsername("root");
-        dsc.setPassword("muyi123");
-        mpg.setDataSource(dsc);
+        dsc.setUsername(userName);
+        dsc.setPassword(password);
 
         // 包配置
         PackageConfig pc = new PackageConfig();
 //        pc.setModuleName(module);
-        pc.setParent("com.muyi.servicestudy");
+        pc.setParent(parentPack);
         pc.setEntity("entity."+module);
         pc.setMapper("mapper."+module);
         pc.setService("service."+module);
         pc.setServiceImpl("service."+module);
         pc.setController("controller."+module);
-        mpg.setPackageInfo(pc);
+
+        // 策略配置
+        StrategyConfig strategy = new StrategyConfig();
+        strategy.setNaming(NamingStrategy.underline_to_camel);
+        strategy.setColumnNaming(NamingStrategy.underline_to_camel);
+//        strategy.setSuperEntityClass("com.muyi.servicestudy.mapper.BaseEntity");
+        strategy.setEntityLombokModel(true);
+        strategy.setRestControllerStyle(true);
+        // 公共父类
+//        strategy.setSuperControllerClass("com.muyi.servicestudy.controller.BaseController");
+        // 写于父类中的公共字段：base entity中属性
+//        strategy.setSuperEntityColumns("id");
+        strategy.setInclude(tableStr.split(","));
+        strategy.setControllerMappingHyphenStyle(true);
+        strategy.setTablePrefix(pc.getModuleName() + "_");
+
+        // 配置模板
+        TemplateConfig templateConfig = new TemplateConfig();
+        templateConfig.setXml(null);
+
+        // 配置自定义输出模板
+        //指定自定义模板路径，注意不要带上.ftl/.vm, 会根据使用的模板引擎自动识别
+        // templateConfig.setEntity("templates/entity2.java");
+        // templateConfig.setService();
+        // templateConfig.setController();
 
         // 自定义配置
         InjectionConfig cfg = new InjectionConfig() {
@@ -60,14 +85,12 @@ public class CodeGenerator {
                 // to do nothing
             }
         };
-
+        // 自定义输出配置
+        List<FileOutConfig> focList = new ArrayList<>();
         // 如果模板引擎是 freemarker
         String templatePath = "/templates/mapper.xml.ftl";
         // 如果模板引擎是 velocity
         // String templatePath = "/templates/mapper.xml.vm";
-
-        // 自定义输出配置
-        List<FileOutConfig> focList = new ArrayList<>();
         // 自定义配置会被优先输出
         /*focList.add(new FileOutConfig(templatePath) {
             @Override
@@ -89,35 +112,23 @@ public class CodeGenerator {
         });
         */
         cfg.setFileOutConfigList(focList);
+
+        // 代码生成器
+        AutoGenerator mpg = new AutoGenerator();
+        // gc.setSwagger2(true); 实体属性 Swagger2 注解
+        //全局配置
+        mpg.setGlobalConfig(gc);
+        //数据库配置
+        mpg.setDataSource(dsc);
+        //包配置
+        mpg.setPackageInfo(pc);
+        //自定义配置
         mpg.setCfg(cfg);
-
-        // 配置模板
-        TemplateConfig templateConfig = new TemplateConfig();
-
-        // 配置自定义输出模板
-        //指定自定义模板路径，注意不要带上.ftl/.vm, 会根据使用的模板引擎自动识别
-        // templateConfig.setEntity("templates/entity2.java");
-        // templateConfig.setService();
-        // templateConfig.setController();
-
-        templateConfig.setXml(null);
+        //配置模板
         mpg.setTemplate(templateConfig);
-
-        // 策略配置
-        StrategyConfig strategy = new StrategyConfig();
-        strategy.setNaming(NamingStrategy.underline_to_camel);
-        strategy.setColumnNaming(NamingStrategy.underline_to_camel);
-//        strategy.setSuperEntityClass("com.muyi.servicestudy.entity.BaseEntity");
-        strategy.setEntityLombokModel(true);
-        strategy.setRestControllerStyle(true);
-        // 公共父类
-//        strategy.setSuperControllerClass("com.muyi.servicestudy.controller.BaseController");
-        // 写于父类中的公共字段：base entity中属性
-//        strategy.setSuperEntityColumns("id");
-        strategy.setInclude(tableStr.split(","));
-        strategy.setControllerMappingHyphenStyle(true);
-        strategy.setTablePrefix(pc.getModuleName() + "_");
+        //策略配置
         mpg.setStrategy(strategy);
+        //模板引擎
         mpg.setTemplateEngine(new FreemarkerTemplateEngine());
         mpg.execute();
     }

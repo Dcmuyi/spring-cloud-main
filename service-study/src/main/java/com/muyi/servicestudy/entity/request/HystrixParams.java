@@ -1,4 +1,4 @@
-package com.muyi.servicestudy.entity.params;
+package com.muyi.servicestudy.entity.request;
 
 import lombok.Data;
 

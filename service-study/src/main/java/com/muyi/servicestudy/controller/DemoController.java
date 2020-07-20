@@ -1,6 +1,6 @@
 package com.muyi.servicestudy.controller;
 
-import com.muyi.servicestudy.entity.params.HystrixParams;
+import com.muyi.servicestudy.entity.request.HystrixParams;
 import com.muyi.servicestudy.exception.AppParamsException;
 import com.muyi.servicestudy.utils.Result;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
