@@ -1,4 +1,4 @@
-package com.muyi.eurekaserver;
+package com.muyi.eurekagateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

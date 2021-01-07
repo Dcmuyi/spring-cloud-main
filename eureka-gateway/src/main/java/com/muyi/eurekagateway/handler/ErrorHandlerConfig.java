@@ -1,4 +1,4 @@
-package com.muyi.eurekaserver.handler;
+package com.muyi.eurekagateway.handler;
 
 import java.util.Collections;
 import java.util.List;

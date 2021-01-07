@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -64,8 +65,8 @@ public class CommonExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @ExceptionHandler({BindException.class})
-    public Result handleSpringBindEx(BindException ex) {
+    @ExceptionHandler({BindException.class, MethodArgumentNotValidException.class})
+    public Result handleSpringBindEx(Exception ex) {
         LOGGER.error("spring参数绑定异常：msg={}", ex.getMessage(), ex);
         return Result.wrapErrorResult(ErrorCode.PARAMS_EX.getCode(), "参数格式错误");
     }

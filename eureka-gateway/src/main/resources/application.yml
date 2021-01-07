@@ -9,7 +9,7 @@ spring:
       discovery:
         locator:
           enabled: false
-          lowerCaseServiceId: false
+          lowerCaseServiceId: true
       default-filters:
         - name: Hystrix
           args:
@@ -18,8 +18,13 @@ spring:
       routes:
         - id: service-hi
           uri: lb://SERVICE-HI
+          filters: Test
           predicates:
-            - Path=/hi/**
+            - Path=/service-hi/**
+        - id: service-study
+          uri: lb://SERVICE-STUDY
+          predicates:
+            - Path=/service-study/**
 
 hystrix:
   command:
@@ -30,19 +35,14 @@ hystrix:
           thread:
             timeoutInMilliseconds: 3000
           semaphore:
-            #默认值10
             maxConcurrentRequests: 1000
       circuitBreaker:
         sleepWindowInMilliseconds:  5000
       fallback:
         isolation:
           semaphore:
-            #默认值10
             maxConcurrentRequests: 1000
 
-
-# 服务注册配置
-# 使用IP注册
 eureka:
   client:
     service-url:

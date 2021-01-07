@@ -75,11 +75,11 @@ public class EsDemoController {
     public long addDocument() throws IOException {
         // 创建文档,相当于往表里面insert一行数据
         XContentBuilder source = jsonBuilder().startObject()// 开始
-                .field("title", "最小的不是你的窝")// 商品名称
-                .field("goodsPrice", 22.34)// 商品价格
-                .field("content", "这只竹鼠肯定中暑了,我们把它送走.")// 商品主人
-                .field("buyUser", "大拿2")// 商品主人
-                .field("status", 1)
+                .field("title", "Hello World")// 商品名称
+                .field("goodsPrice", 4)// 商品价格
+                .field("content", "这只竹鼠肯12定中暑了,我们把它21送走.")// 商品主人
+                .field("buyUser", "muyi木奕")// 商品主人
+                .field("status", 0)
                 .field("goodsTime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()))// 商品上架时间
                 .endObject();
         log.info("so:"+source.toString());

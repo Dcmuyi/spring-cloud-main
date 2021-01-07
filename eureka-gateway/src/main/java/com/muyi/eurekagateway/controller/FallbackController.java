@@ -1,4 +1,4 @@
-package com.muyi.eurekaserver.controller;
+package com.muyi.eurekagateway.controller;
 
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;

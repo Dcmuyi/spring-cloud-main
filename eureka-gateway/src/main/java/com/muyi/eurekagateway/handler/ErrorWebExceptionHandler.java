@@ -1,4 +1,4 @@
-package com.muyi.eurekaserver.handler;
+package com.muyi.eurekagateway.handler;
 
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
