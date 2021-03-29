@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * 定义属性是否参与查询
+ * @author muyi
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
