@@ -28,6 +28,11 @@ spring:
           filters:
             - StripPrefix=1
             - PrefixPath=/service-study
+            - name: RequestRateLimiter
+              args:
+                  key-resolver: '#{@userKeyResolver}'
+                  redis-rate-limiter.replenishRate: 2
+                  redis-rate-limiter.burstCapacity: 5
 
 hystrix:
   command:
@@ -55,3 +60,7 @@ eureka:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
 
+redis:
+  host: 127.0.0.1
+  port: 6379
+  database: 0
