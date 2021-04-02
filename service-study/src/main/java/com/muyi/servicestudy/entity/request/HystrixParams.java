@@ -11,13 +11,10 @@ public class HystrixParams {
     @NotNull
     private String albumId;
 
-    @NotBlank
     private String artistId;
 
     private String type = "cat";
 
-    @NotNull
-    @Size(min = 11, max = 11, message = "mobile length error")
     private String mobile;
 
 

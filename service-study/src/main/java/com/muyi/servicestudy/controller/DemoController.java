@@ -17,9 +17,8 @@ import org.springframework.web.server.ServerWebExchange;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Muyi,  dcmuyi@qq.com
@@ -34,23 +33,45 @@ public class DemoController {
     @Value("${spring.application.name}")
     String name;
 
-    @HystrixCommand(fallbackMethod = "/hystrix_back", ignoreExceptions = {Exception.class})
-    @GetMapping("/hystrix")
-    public Result hystrix(@Validated HystrixParams hystrixParams) {
+    @HystrixCommand(fallbackMethod = "/hystrix_back")
+    @RequestMapping("/hystrix")
+    public Result hystrix(@Validated HystrixParams hystrixParams, BindingResult bindingResult, HttpServletRequest request) {
         log.info("params: " + hystrixParams);
+
+        try {
+            Thread.sleep(5000);
+        } catch (Exception e) {}
 
         return Result.wrapSuccessfulResult("");
     }
 
     @Validated
     @PostMapping("/testPost")
-    public Result testPost(@RequestBody @Valid HystrixParams hystrixParams, HttpServletRequest request) {
+    public Result testPost(@RequestBody HystrixParams hystrixParams, HttpServletRequest request) {
         log.info("params: " + hystrixParams);
-        String dd = "4.12.2_2193 94";
-        List<String> te = Arrays.asList(hystrixParams.getAlbumId().split(" |_"));
-        log.info("====te:"+te);
+        String pcode = "XE110JH";
+        //对应key
+        String key = hystrixParams.getAlbumId()+"_"+pcode;
 
-        log.info("===="+ request.getHeader("token")+"===="+request.getHeader("test"));
+        //cver分割
+        List<String> cverList = Arrays.asList(hystrixParams.getAlbumId().split(" |_|\\."));
+        log.info("====te:"+cverList);
+        LinkedHashSet keyList = new LinkedHashSet<>();
+        //取前3
+        cverList = cverList.stream().limit(3).collect(Collectors.toList());
+        String cverString = String.join(".", cverList);
+        //放入list
+        keyList.add(cverString+"_"+pcode);
+        keyList.add(cverString+"_");
+        //前2
+        cverList = cverList.stream().limit(2).collect(Collectors.toList());
+        cverString = String.join(".", cverList);
+        //放入list
+        keyList.add(cverString+"_"+pcode);
+        keyList.add(cverString+"_");
+
+        log.info("===="+ keyList);
+        log.info("----"+key);
 
         return Result.wrapSuccessfulResult("");
     }

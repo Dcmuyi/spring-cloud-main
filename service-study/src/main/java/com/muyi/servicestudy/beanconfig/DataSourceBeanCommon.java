@@ -14,10 +14,6 @@ import java.util.List;
 
 /**
  * @author Muyi,  dcmuyi@qq.com
- * @dep 互联网事业部
- * @desc
- * @company 浙江亿咖通科技有限公司  Zhejiang e-CarX Technology Co., Ltd
- * @address 浙江省杭州市滨江区和仁大厦15楼
  * @date 2019/11/5.
  */
 public class DataSourceBeanCommon {

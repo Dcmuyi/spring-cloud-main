@@ -5,10 +5,7 @@ import java.util.Random;
 
 /**
  * @author Muyi,  dcmuyi@qq.com
- * @dep 云端技术部
  * @desc 随机数类
- * @company 浙江亿咖通科技有限公司  Zhejiang e-CarX Technology Co., Ltd
- * @address 浙江省杭州市滨江区泰安路杭州印B座17楼(华联.星光大道2期西)
  * @date 2019-04-17.
  */
 public class RandomUtil {
