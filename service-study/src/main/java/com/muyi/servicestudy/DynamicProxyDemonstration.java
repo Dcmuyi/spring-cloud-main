@@ -20,6 +20,8 @@ public class DynamicProxyDemonstration {
     public static void main(String[] args) {
         //真实的代理对象
         Man man = new Man();
+        man.getClass().getInterfaces();
+        log.info("-=-");
 
         //代理
         InvocationHandler handler = new InvocationHandlerImpl(man);
