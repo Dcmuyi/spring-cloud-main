@@ -1,7 +1,6 @@
-package com.ecarx.provider.demo.service.lc_new;
+package com.provider.demo.service.lc_new;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ecarx.provider.demo.service.lc.TreeNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.decorators.LruCache;
 
@@ -12,7 +11,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author Muyi, dingchuan.yang@ecarx.com.cn
+ * @author Muyi
  * @dep 云端技术部
  * @desc
  * @company 浙江亿咖通科技有限公司  Zhejiang e-CarX Technology Co., Ltd
