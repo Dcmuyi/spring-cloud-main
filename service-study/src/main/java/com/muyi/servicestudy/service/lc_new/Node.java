@@ -1,4 +1,4 @@
-package com. .provider.demo.service.lc_new;
+package com.muyi.servicestudy.service.lc_new;
 
 import lombok.Data;
 

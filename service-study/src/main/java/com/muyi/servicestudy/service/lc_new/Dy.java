@@ -1,9 +1,8 @@
-package com.provider.demo.service.lc_new;
+package com.muyi.servicestudy.service.lc_new;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.decorators.LruCache;
-
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
@@ -12,10 +11,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Muyi
- * @dep 云端技术部
- * @desc
- * @company 浙江亿咖通科技有限公司  Zhejiang e-CarX Technology Co., Ltd
- * @address 浙江省杭州市滨江区泰安路杭州印B座17楼(华联.星光大道2期西)
  * @date 2019-04-17.
  */
 @Slf4j
