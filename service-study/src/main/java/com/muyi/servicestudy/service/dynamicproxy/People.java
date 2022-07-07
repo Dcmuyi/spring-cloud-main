@@ -1,4 +1,4 @@
-package com.muyi.servicestudy.dynamicproxy;
+package com.muyi.servicestudy.service.dynamicproxy;
 
 /**
  * @author Muyi, dcmuyi@qq.com

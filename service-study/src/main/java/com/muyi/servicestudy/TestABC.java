@@ -21,9 +21,6 @@ public class TestABC {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         ThreadPoolExecutor thread = new ThreadPoolExecutor(3,3,20, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
 
-
-
-
         thread.execute(()->{
             for (int i=0; i< 10;) {
                 try {

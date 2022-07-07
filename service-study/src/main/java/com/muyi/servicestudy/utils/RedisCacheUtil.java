@@ -6,6 +6,9 @@ import java.lang.reflect.Method;
 import redis.clients.jedis.Jedis;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 import org.springframework.dao.DataAccessException;
@@ -119,14 +122,12 @@ public class RedisCacheUtil {
         return redisTemplate.getExpire(key, timeUnit);
     }
 
+    //仅获取缓存
     public String getCacheData(String key) {
         return getCacheData(key, null, null, DEFAULT_EXPIRE_SECONDS);
     }
 
-    public String getCacheData(String key, long seconds) {
-        return getCacheData(key, null, null, seconds);
-    }
-
+    //获取缓存，不存在则通过反射获取
     public String getCacheData(String key, Class<?> targetClass, String methodName) {
         return getCacheData(key, targetClass, methodName, DEFAULT_EXPIRE_SECONDS);
     }
@@ -150,6 +151,27 @@ public class RedisCacheUtil {
                 res = data.toString();
 
                 redisTemplate.opsForValue().set(key, res, seconds, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                LOG.error("get cache error :"+e.toString());
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * 通过supplier函数和lambda表达似乎获取缓存
+     * @param key 缓存key
+     * @param supplier 数据获取
+     * @return 数据
+     */
+    public String getCacheData(String key, Supplier<String> supplier) {
+        String res = redisTemplate.opsForValue().get(key);
+        if (null == res && null != supplier) {
+            try {
+                res = supplier.get();
+
+                redisTemplate.opsForValue().set(key, res, 1000, TimeUnit.SECONDS);
             } catch (Exception e) {
                 LOG.error("get cache error :"+e.toString());
             }

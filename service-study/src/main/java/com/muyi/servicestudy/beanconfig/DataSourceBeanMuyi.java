@@ -1,21 +1,23 @@
 package com.muyi.servicestudy.beanconfig;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
-import com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.extension.plugins.OptimisticLockerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.PerformanceInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
-import com.muyi.servicestudy.config.DataSourceConfig;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.context.annotation.Primary;
+import javax.sql.DataSource;
 
 /**
  * @author Muyi,  dcmuyi@qq.com
@@ -23,37 +25,32 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  */
 @Configuration
 @MapperScan(basePackages = "com.muyi.servicestudy.mapper.muyi", sqlSessionFactoryRef = "muyiSqlSessionFactory")
-public class DataSourceBeanMuyi extends DataSourceBeanCommon {
-    @Autowired
-    private DataSourceConfig dataSourceConfig;
+public class DataSourceBeanMuyi {
 
-    @Bean(name = "muyiTransactionManager")
-    public DataSourceTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(dataSource());
+    @Bean(name = "muyiDataSource")
+    @ConfigurationProperties(prefix = "datasource.muyi")
+    public DruidDataSource dataSource() {
+        return DruidDataSourceBuilder.create().build();
     }
 
     @Bean(name = "muyiSqlSessionFactory")
-    public SqlSessionFactory sqlSessionFactory() throws Exception {
+    public SqlSessionFactory sqlSessionFactory(@Qualifier("muyiDataSource") DataSource dataSource, @Qualifier("globalConfiguration") GlobalConfig globalConfig) throws Exception {
         final MybatisSqlSessionFactoryBean sessionFactory = new MybatisSqlSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
-        MybatisConfiguration configuration = new MybatisConfiguration();
-        configuration.setDefaultScriptingLanguage(MybatisXMLLanguageDriver.class);
-        configuration.setJdbcTypeForNull(JdbcType.NULL);
-        sessionFactory.setConfiguration(configuration);
+        sessionFactory.setDataSource(dataSource);
         sessionFactory.setPlugins(new Interceptor[]{
                 new PaginationInterceptor(),
+                //去掉性能分析器可隐藏控制台打印sql
                 new PerformanceInterceptor(),
                 new OptimisticLockerInterceptor()
         });
-        return sessionFactory.getObject();
-    }
+        sessionFactory.setGlobalConfig(globalConfig);
+        //配置mybatis自动转驼峰不生效
+//        sessionFactory.getObject().getConfiguration().setMapUnderscoreToCamelCase(false);
 
-    @Bean(name = "muyiDataSource")
-    public DruidDataSource dataSource() {
-        DruidDataSource dataSource = super.getCommonDruidDataSource();
-        dataSource.setUrl(dataSourceConfig.getUrlMuyi());
-        dataSource.setUsername(dataSourceConfig.getUsernameMuyi());
-        dataSource.setPassword(dataSourceConfig.getPasswordMuyi());
-        return dataSource;
+        //设置空值可以执行
+//        MybatisConfiguration configuration = new MybatisConfiguration();
+//        configuration.setJdbcTypeForNull(JdbcType.NULL);
+//        sessionFactory.setConfiguration(configuration);
+        return sessionFactory.getObject();
     }
 }

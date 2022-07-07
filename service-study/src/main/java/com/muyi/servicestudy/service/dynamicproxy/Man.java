@@ -1,4 +1,4 @@
-package com.muyi.servicestudy.dynamicproxy;
+package com.muyi.servicestudy.service.dynamicproxy;
 
 /**
  * @author Muyi, dcmuyi@qq.com
@@ -8,6 +8,7 @@ package com.muyi.servicestudy.dynamicproxy;
 public class Man implements People{
     @Override
     public String say() {
+        System.out.println("man say:");
         return "i am man";
     }
 

@@ -1,0 +1,23 @@
+@startuml
+autonumber
+
+participant 客户端  as A
+participant 极享云  as B
+participant 索尼云  as C
+
+A -> B: 用户登录
+B -> B: 生成token
+B --> A: 返回
+
+note left: ddd
+
+group <color:red>异步登录索尼
+
+B -> C: 索尼登录(传：极享token)
+C -> B: 获取极享手机号(传：极享token)
+B --> C: 返回极享手机号
+C -> C: 索尼流程
+C --> B: 返回索尼token
+end
+
+@enduml

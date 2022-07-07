@@ -22,6 +22,5 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void updateFill(MetaObject metaObject) {
         long nowTime = DateUtil.getCurrentTime();
         this.setFieldValByName("updatedAt", nowTime, metaObject);
-        System.out.println("====");
     }
 }

@@ -21,6 +21,7 @@ public class FirstFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        log.info("=====");
         ServerHttpRequest request = exchange.getRequest();
         log.info("first filter request ="+JSON.toJSONString(request));
         log.info("body:"+ exchange.getAttribute("POST_BODY"));

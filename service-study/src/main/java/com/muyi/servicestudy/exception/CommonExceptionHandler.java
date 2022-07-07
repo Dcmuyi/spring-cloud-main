@@ -2,11 +2,11 @@
 package com.muyi.servicestudy.exception;
 
 import com.muyi.servicestudy.utils.Result;
-import com.netflix.client.ClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,8 +14,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ControllerAdvice
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.xml.bind.ValidationException;
+import java.util.stream.Collectors;
+
 @ResponseBody
+@ControllerAdvice
 public class CommonExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionHandler.class);
 
@@ -44,31 +49,44 @@ public class CommonExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @ExceptionHandler({AppLoginException.class})
-    public Result handleAppLoginEx(AppLoginException ex) {
-        LOGGER.error("登录异常：msg={}", ex.getMessage(), ex);
-        return Result.wrapErrorResult(ErrorCode.LOGIN_EX.getCode(), ex.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ClientException.class})
-    public Result handleClientEx(ClientException ex) {
-        LOGGER.error("客户端异常：msg={}", ex.getMessage(), ex);
-        return Result.wrapErrorResult(ErrorCode.PARAMS_EX.getCode(), ex.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler({NumberFormatException.class})
     public Result handleNumberFormatEx(NumberFormatException ex) {
         LOGGER.error("数字格式化异常：msg={}", ex.getMessage(), ex);
         return Result.wrapErrorResult(ErrorCode.PARAMS_EX.getCode(), "数字格式错误");
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @ExceptionHandler({BindException.class, MethodArgumentNotValidException.class})
-    public Result handleSpringBindEx(Exception ex) {
-        LOGGER.error("spring参数绑定异常：msg={}", ex.getMessage(), ex);
-        return Result.wrapErrorResult(ErrorCode.PARAMS_EX.getCode(), "参数格式错误");
+    @ExceptionHandler(value = {BindException.class, ValidationException.class, MethodArgumentNotValidException.class})
+    public Result handleValidatedException(Exception e) {
+        LOGGER.error("参数校验失败："+e.getMessage());
+        Result resp = null;
+
+        if (e instanceof MethodArgumentNotValidException) {
+            // BeanValidation exception
+            MethodArgumentNotValidException ex = (MethodArgumentNotValidException) e;
+            resp = Result.wrapErrorResult(HttpStatus.BAD_REQUEST.value(),
+                    ex.getBindingResult().getAllErrors().stream()
+                            .map(ObjectError::getDefaultMessage)
+                            .collect(Collectors.joining("; "))
+            );
+        } else if (e instanceof ConstraintViolationException) {
+            // BeanValidation GET simple param
+            ConstraintViolationException ex = (ConstraintViolationException) e;
+            resp = Result.wrapErrorResult(HttpStatus.BAD_REQUEST.value(),
+                    ex.getConstraintViolations().stream()
+                            .map(ConstraintViolation::getMessage)
+                            .collect(Collectors.joining("; "))
+            );
+        } else if (e instanceof BindException) {
+            // BeanValidation GET object param
+            BindException ex = (BindException) e;
+            resp = Result.wrapErrorResult(HttpStatus.BAD_REQUEST.value(),
+                    ex.getAllErrors().stream()
+                            .map(ObjectError::getDefaultMessage)
+                            .collect(Collectors.joining("; "))
+            );
+        }
+
+        return resp;
     }
 
     @ResponseStatus(HttpStatus.OK)

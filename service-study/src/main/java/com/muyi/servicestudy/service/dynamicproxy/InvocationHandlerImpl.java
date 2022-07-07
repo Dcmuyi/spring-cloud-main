@@ -1,4 +1,4 @@
-package com.muyi.servicestudy.dynamicproxy;
+package com.muyi.servicestudy.service.dynamicproxy;
 
 import lombok.extern.slf4j.Slf4j;
 

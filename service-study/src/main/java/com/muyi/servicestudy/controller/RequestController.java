@@ -1,43 +1,48 @@
 package com.muyi.servicestudy.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.muyi.servicestudy.entity.request.HystrixParams;
-import com.muyi.servicestudy.exception.AppParamsException;
-import com.muyi.servicestudy.utils.Result;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
+import java.util.*;
 
-import javax.servlet.ServletRequest;
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import java.util.stream.Collectors;
+import com.muyi.servicestudy.utils.Result;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.*;
-import java.util.stream.Collectors;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import com.muyi.servicestudy.annotation.LogAnnotation;
+import org.springframework.beans.factory.annotation.Value;
+import com.muyi.servicestudy.entity.request.HystrixParams;
+import com.muyi.servicestudy.service.dc.DefaultServiceImpl;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
+ * common request demo
  * @author Muyi,  dcmuyi@qq.com
  * @date 2019/11/21.
  */
 @Slf4j
 @RestController
-@RequestMapping("/service-study/demo")
-public class DemoController {
+@RequestMapping("/demo")
+public class RequestController {
     @Value("${server.port}")
     String port;
     @Value("${spring.application.name}")
     String name;
 
+    @PostMapping("/validation")
+    public void validation(@Valid HystrixParams hystrixParams) {
+        log.info("params:"+ JSONObject.toJSONString(hystrixParams));
+    }
+
     @HystrixCommand(fallbackMethod = "/hystrix_back")
     @RequestMapping("/hystrix")
-    public Result hystrix(@Validated HystrixParams hystrixParams, BindingResult bindingResult, HttpServletRequest request) {
+    @LogAnnotation
+    public Result hystrix(@Validated HystrixParams hystrixParams) {
         log.info("params: " + hystrixParams);
-
         try {
             Thread.sleep(5000);
         } catch (Exception e) {}
@@ -47,7 +52,7 @@ public class DemoController {
 
     @Validated
     @PostMapping("/testPost")
-    public Result testPost(@RequestBody HystrixParams hystrixParams, HttpServletRequest request) {
+    public Result testPost(@RequestBody HystrixParams hystrixParams) {
         log.info("params: " + hystrixParams);
         String pcode = "XE110JH";
         //对应key
@@ -75,6 +80,7 @@ public class DemoController {
 
         return Result.wrapSuccessfulResult("");
     }
+
 
     /**
      * 熔断方法

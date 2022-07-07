@@ -3,16 +3,44 @@ package com.muyi.servicestudy;
 import com.alibaba.fastjson.JSONObject;
 import com.muyi.servicestudy.utils.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
+//多线程注解
+@Async
 public class FutureTest {
     public static void main(String[] args) throws Exception{
-//        for (int i = 0; i< 20;i++) {
-//            log.info("++"+ (new Random()).nextInt(20));
-//        }
-        test1();
+
+        List<FutureTask<String>> list = new ArrayList<>();
+        ThreadPoolExecutor executorService = new ThreadPoolExecutor(2,4,20, TimeUnit.MINUTES,new LinkedBlockingQueue<>(4), new ThreadPoolExecutor.CallerRunsPolicy());
+
+        for (int i=0;i<10;i++) {
+            int finalI = i;
+            FutureTask<String> futureTask = new FutureTask<>(()-> {
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception ignore){}
+
+                return "dd"+ finalI;
+            });
+
+            executorService.execute(futureTask);
+            list.add(futureTask);
+        }
+
+        List<String> re = new ArrayList<>();
+        for (FutureTask<String> f : list) {
+            log.info(f.toString());
+            re.add(f.get());
+        }
+
+        log.info("==:"+JSONObject.toJSONString(re));
+
     }
 
     public static void test1() throws InterruptedException {

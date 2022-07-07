@@ -3,6 +3,9 @@ package com.muyi.servicestudy.service.lc_new;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.decorators.LruCache;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
@@ -34,6 +37,8 @@ public class Dy {
     private static Node n1 = new Node(4, new Node(2, new Node(1), new Node(3)), new Node(5));
 
     public static void main(String[] args) {
+        int[] num = (new Dy()).arraySort(new int[]{3,15,1,3,7,4,1,10});
+        log.info("=="+JSONObject.toJSONString(num));
         int[][] intArr = new int[3][4];
         intArr[0] = new int[]{1, 3, 7, 11};
         intArr[1] = new int[]{2, 5, 8, 12};
@@ -43,45 +48,6 @@ public class Dy {
         board[0] = new char[]{'A', 'B', 'C', 'E'};
         board[1] = new char[]{'S', 'F', 'C', 'S'};
         board[2] = new char[]{'A', 'D', 'E', 'E'};
-
-//        DoubleList l = new DoubleList(-1,-1);
-//        DoubleList ll = l;
-//        for (int i = 1; i< 5;i++) {
-//            DoubleList node = new DoubleList(i, i);
-//            ll.next = node;
-//            node.pre = ll;
-//            ll = ll.next;
-//        }
-
-        LRUCache cache = new LRUCache(3);
-        cache.put(1,1);
-        cache.put(2,2);
-        cache.put(3,3);
-        cache.put(4,4);
-
-        log.info(cache.head.toString());
-        cache.get(2);
-
-        log.info(cache.head.toString());
-//        cache.get(3);
-//
-//        log.info(cache.head.toString());
-//        cache.get(2);
-//
-//        log.info(cache.head.toString());
-//        cache.get(1);
-//
-//        log.info(cache.head.toString());
-//        log.info("=="+cache.cache.size());
-//        cache.put(5,5);
-//        log.info(cache.head.toString());
-//        cache.get(1);
-//        cache.get(2);
-//        cache.get(3);
-//        cache.get(4);
-//        cache.get(5);
-
-
 
         //111 11
 //        log.info("======" + (new Dy()).GetUglyNumberNew(3));
@@ -102,12 +68,18 @@ public class Dy {
 //        log.info("======" + (new Dy()).search(new int[] {1,3,5,6,7,8,8,9}, 8));
     }
 
+    //最大面积
+    public int maxArea(int[] height) {
+
+        return 1;
+    }
+
     //丑数
     public int GetUglyNumberNew(int n) {
         //动态规划数组
         int[] dp = new int[n];
         dp[0] = 1;
-        //定义abc分别表示2,3,5对应的丑数值
+        //定义abc分别表示2,3,5对应的丑数倍数
         int a = 0,b=0,c=0;
         for (int i = 1; i<n; i++) {
             //丑数必为已有丑数*2,3,5，初始为1
@@ -221,7 +193,7 @@ public class Dy {
 
     //是否平衡二叉树
     public boolean isBalanced(TreeNode root) {
-        if (root == null) return false;
+        if (root == null) return true;
 
         return Math.abs(maxDepth(root.left) - maxDepth(root.right)) < 2 && isBalanced(root.left) && isBalanced(root.right);
     }
@@ -280,12 +252,33 @@ public class Dy {
 
     //！！排序
     public int[] arraySort(int[] nums) {
-        quickSort(nums, 0, nums.length - 1);
+        sort(nums, 0, nums.length - 1);
 //        Arrays.sort(nums);
 
         return nums;
     }
 
+    public void sort(int[] nums, int l, int r) {
+        if (l >= r) return;
+        //定义i，j替代l r循环
+        int i = l, j = r;
+        int compareNum = nums[l], tmp;
+        while (i<j) {
+            while (nums[j] >= compareNum && i<j) j--;
+            while (nums[i] <= compareNum && i<j) i++;
+
+            tmp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = tmp;
+        }
+
+        nums[l] = nums[i];
+        nums[i] = compareNum;
+        log.info("sort:"+JSONObject.toJSONString(nums)+"l:"+l+"-"+r);
+
+        sort(nums, l, i-1);
+        sort(nums, i+1, r);
+    }
     //快排
     public void quickSort(int[] nums, int l, int r) {
         if (l >= r) return;
@@ -307,12 +300,10 @@ public class Dy {
         nums[l] = nums[i];
         nums[i] = tmp;
 
-
         //左右继续递归
         quickSort(nums, l, i - 1);
         quickSort(nums, i + 1, r);
     }
-
 
     //把数组排成最小数
     public String minNumber(int[] nums) {
@@ -333,7 +324,6 @@ public class Dy {
 
         return s.toString();
     }
-
 
     /**
      * 搜索回溯-中等
@@ -866,8 +856,8 @@ public class Dy {
             return new ArrayList<>();
         }
 
-        ArrayList<List<Integer>> arrayList = new ArrayList();
-        LinkedList<TreeNode> list = new LinkedList() {{
+        ArrayList<List<Integer>> arrayList = new ArrayList<>();
+        LinkedList<TreeNode> list = new LinkedList<TreeNode>() {{
             add(root);
         }};
         while (!list.isEmpty()) {
@@ -992,7 +982,7 @@ public class Dy {
         return l;
     }
 
-    //在排序数组中查找数字 I
+    //在排序数组中查找数字长度
     public int search(int[] nums, int target) {
         //二分
         int l = 0, r = nums.length - 1, m;

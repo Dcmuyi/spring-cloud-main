@@ -1,26 +1,21 @@
 package com.muyi.servicestudy.beanconfig;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.support.http.StatViewServlet;
-import com.baomidou.mybatisplus.core.MybatisConfiguration;
-import com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver;
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.extension.plugins.OptimisticLockerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.PerformanceInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
-import com.muyi.servicestudy.config.DataSourceConfig;
-import com.muyi.servicestudy.config.DruidStatConfig;
 import com.muyi.servicestudy.handler.MyMetaObjectHandler;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import javax.sql.DataSource;
 
 /**
  * @author Muyi,  dcmuyi@qq.com
@@ -28,52 +23,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
  */
 @Configuration
 @MapperScan(basePackages = "com.muyi.servicestudy.mapper.dc", sqlSessionFactoryRef = "dcSqlSessionFactory")
-public class DataSourceBeanDc extends DataSourceBeanCommon {
-    @Autowired
-    private DataSourceConfig dataSourceConfig;
-    @Autowired
-    private DruidStatConfig druidStatConfig;
-
-    @Bean(name = "dcTransactionManager")
-    public DataSourceTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(dataSource());
-    }
-
-    @Bean(name = "dcSqlSessionFactory")
-    public SqlSessionFactory sqlSessionFactory() throws Exception {
-        final MybatisSqlSessionFactoryBean sessionFactory = new MybatisSqlSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
-        MybatisConfiguration configuration = new MybatisConfiguration();
-        configuration.setDefaultScriptingLanguage(MybatisXMLLanguageDriver.class);
-        configuration.setJdbcTypeForNull(JdbcType.NULL);
-        sessionFactory.setConfiguration(configuration);
-//        sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver()
-//                .getResources(MAPPER_LOCATION));
-        sessionFactory.setPlugins(new Interceptor[]{
-                new PaginationInterceptor(),
-                new PerformanceInterceptor(),
-                new OptimisticLockerInterceptor()
-        });
-        sessionFactory.setGlobalConfig(globalConfiguration());
-        return sessionFactory.getObject();
-    }
-
-    @Bean
-    public ServletRegistrationBean druidServlet() {
-        ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(new StatViewServlet(),druidStatConfig.getUrlPattern());
-        // IP白名单
-        servletRegistrationBean.addInitParameter("allow", druidStatConfig.getAllow());
-        // IP黑名单(共同存在时，deny优先于allow)
-//        servletRegistrationBean.addInitParameter("deny", "192.168.1.100");
-        //控制台管理用户
-        servletRegistrationBean.addInitParameter("loginUsername", druidStatConfig.getLoginUsername());
-        servletRegistrationBean.addInitParameter("loginPassword", druidStatConfig.getLoginPassword());
-        //是否能够重置数据 禁用HTML页面上的“Reset All”功能
-        servletRegistrationBean.addInitParameter("resetEnable", druidStatConfig.getResetEnable());
-
-        return servletRegistrationBean;
-    }
-
+public class DataSourceBeanDc {
     @Bean
     public GlobalConfig globalConfiguration() {
         GlobalConfig conf = new GlobalConfig();
@@ -82,12 +32,30 @@ public class DataSourceBeanDc extends DataSourceBeanCommon {
     }
 
     @Bean(name = "dcDataSource")
+    @ConfigurationProperties(prefix = "datasource.dc")
     public DruidDataSource dataSource() {
-        DruidDataSource dataSource = super.getCommonDruidDataSource();
-        dataSource.setUrl(dataSourceConfig.getUrlDc());
-        dataSource.setUsername(dataSourceConfig.getUsernameDc());
-        dataSource.setPassword(dataSourceConfig.getPasswordDc());
-
-        return dataSource;
+        return DruidDataSourceBuilder.create().build();
     }
+
+    @Bean(name = "dcSqlSessionFactory")
+    public SqlSessionFactory sqlSessionFactory(@Qualifier("dcDataSource") DataSource dataSource, @Qualifier("globalConfiguration") GlobalConfig globalConfig) throws Exception {
+        final MybatisSqlSessionFactoryBean sessionFactory = new MybatisSqlSessionFactoryBean();
+        sessionFactory.setDataSource(dataSource);
+        sessionFactory.setPlugins(new Interceptor[]{
+                new PaginationInterceptor(),
+                //去掉性能分析器可隐藏控制台打印sql
+                new PerformanceInterceptor(),
+                new OptimisticLockerInterceptor()
+        });
+        sessionFactory.setGlobalConfig(globalConfig);
+        //配置mybatis自动转驼峰不生效
+        //sessionFactory.getObject().getConfiguration().setMapUnderscoreToCamelCase(false);
+
+        //设置空值可以执行
+//        MybatisConfiguration configuration = new MybatisConfiguration();
+//        configuration.setJdbcTypeForNull(JdbcType.NULL);
+//        sessionFactory.setConfiguration(configuration);
+        return sessionFactory.getObject();
+    }
+
 }

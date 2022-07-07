@@ -1,8 +1,10 @@
 package com.muyi.servicestudy.utils;
 
+import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +24,7 @@ public class ThreadUtil {
     public  ThreadPoolExecutor getExecutorService() {
         if (null == executorService){
             executorService = new ThreadPoolExecutor(corePoolSize,maximumPoolSize,keepAliveTime, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>(100),new ThreadPoolExecutor.CallerRunsPolicy());
+                    new LinkedBlockingQueue<Runnable>(100),new DefaultThreadFactory("dd"), new ThreadPoolExecutor.CallerRunsPolicy());
         }
 
         return executorService;

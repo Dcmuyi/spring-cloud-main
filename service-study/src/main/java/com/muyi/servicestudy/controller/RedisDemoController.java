@@ -34,6 +34,22 @@ public class RedisDemoController {
     //100W容量,容错0.0003
     private static BloomFilter<Integer> bf = BloomFilter.create(Funnels.integerFunnel(), 1000000, 0.0003);
 
+    @RequestMapping("getCache")
+    public void getCache() {
+        //通过supplier获取data
+        String resSu = redisCacheUtil.getCacheData("key1", ()->getData("muyi11"));
+        log.info("su:"+resSu);
+
+        String resRef = redisCacheUtil.getCacheData("key2", this.getClass(), "getData");
+        log.info("ref:"+resRef);
+    }
+
+    public String getData(String str) {
+        log.info("===get data===");
+
+        return "hello "+str;
+    }
+
     @RequestMapping(value = "/lock", method = RequestMethod.GET)
     public void lock() {
         String lockKey = "study:muyi_lock";

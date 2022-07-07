@@ -8,6 +8,11 @@ public class Result<T> {
     private Result() {
     }
 
+
+    public String getTest() {
+        return "132";
+    }
+
     public String getMessage() {
         return this.message;
     }
